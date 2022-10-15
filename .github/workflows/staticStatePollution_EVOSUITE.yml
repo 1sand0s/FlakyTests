@@ -19,7 +19,7 @@ jobs:
           export EVOSUITE="$(pwd)/evosuite-master-1.2.0.jar"
           export EVOSUITE_RUNTIME="$(pwd)/evosuite-standalone-runtime-1.2.0.jar"
           cd ..
-          cd staticStatePollutionExampl
+          cd staticStatePollutionExample
           mvn clean -DskipTests install
           mvn dependency:copy-dependencies
           cd evosuite-tests
