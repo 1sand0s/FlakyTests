@@ -15,5 +15,5 @@ jobs:
           distribution: "adopt"
       - name: Build Install and Test with Maven
         run: |
-	  cd staticStatePollutionExample
-	  mvn clean install
+          cd staticStatePollutionExample
+          mvn clean install
