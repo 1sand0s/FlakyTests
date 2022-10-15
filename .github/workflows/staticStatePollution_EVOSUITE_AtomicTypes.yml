@@ -1,4 +1,4 @@
-name: staticStatePollution_EVOSUITE
+name: staticStatePollution_EVOSUITE_AtomicTypes
 
 on: [push]
 
