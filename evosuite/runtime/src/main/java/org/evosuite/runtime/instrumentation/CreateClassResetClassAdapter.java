@@ -32,6 +32,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.regex.Pattern;
 
 /**
@@ -80,7 +82,11 @@ public class CreateClassResetClassAdapter extends ClassVisitor {
 
     private static final Logger logger = LoggerFactory.getLogger(CreateClassResetClassAdapter.class);
 
-    private ArrayList<StaticField> staticFields = new ArrayList<StaticField>();
+    public static ArrayList<StaticField> staticFields = new ArrayList<>();
+
+    public static ArrayList<Object> staticFieldValues = new ArrayList<>();
+
+    public static int count1;
 
     /**
      * Indicates if the current class being visited is an interface
@@ -185,8 +191,9 @@ public class CreateClassResetClassAdapter extends ClassVisitor {
 
         if (hasStaticModifier(access)) {
             StaticField staticField = new StaticField(className, name, desc, value);
-	    System.out.println("Initial Value : " + staticField.toString() + " " + staticField.value);
+	    System.out.println("Initial Value : " + staticField.toString() + " " + value);
             staticFields.add(staticField);
+	    //staticFieldValues.add(null);
         }
 
 	/*  if (!isEnum && !isInterface && removeFinalModifierOnStaticFields) {
@@ -238,7 +245,7 @@ public class CreateClassResetClassAdapter extends ClassVisitor {
 	    return staticResetStaticFieldAdapter;
 	}
 	else{
-	    CreateClassResetStaticFieldAdapter staticResetStaticFieldAdapter = new CreateClassResetStaticFieldAdapter(mv, methodName, className, staticFields, finalFields);
+	    CreateClassResetStaticFieldAdapter staticResetStaticFieldAdapter = new CreateClassResetStaticFieldAdapter(mv, methodName, className);
 	    return staticResetStaticFieldAdapter;
 	}
 	/*System.out.println("Method Name : " + methodName);
@@ -350,11 +357,11 @@ public class CreateClassResetClassAdapter extends ClassVisitor {
         MethodVisitor mv = cv.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC,
                 ClassResetter.STATIC_RESET, "()V", null, null);
         mv.visitCode();
-	System.out.println("Num static fields : " + staticFields.size() + " " + modifiedStaticFieldsPUTSTATIC.size());
-        for (StaticField staticField : staticFields) {
+	System.out.println("Num static fields : " + staticFields.size() + " " + modifiedStaticFieldsPUTSTATIC.size() + " " + staticFieldValues.size());
+        for (int j = 0; j < staticFields.size(); j++) {
+	    StaticField staticField = staticFields.get(j);
 	    if(!modifiedStaticFieldsPUTSTATIC.contains(staticField.name))
 		continue;
-	    System.out.println(staticField.toString() + " " + staticField.value);
             if (!finalFields.contains(staticField.name) && !staticField.name.startsWith("__cobertura")
                     && !staticField.name.startsWith("$jacoco") && !staticField.name.startsWith("$VRc") // Old
                     // Emma
@@ -362,41 +369,54 @@ public class CreateClassResetClassAdapter extends ClassVisitor {
             ) {
 
                 logger.info("Adding bytecode for initializing field " + staticField.name);
-
-                if (staticField.value != null) {
-                    mv.visitLdcInsn(staticField.value);
-                } else {
-                    Type type = Type.getType(staticField.desc);
-                    switch (type.getSort()) {
-                        case Type.BOOLEAN:
-                        case Type.BYTE:
-                        case Type.CHAR:
-                        case Type.SHORT:
-                        case Type.INT:
-                            mv.visitInsn(Opcodes.ICONST_0);
-                            break;
-                        case Type.FLOAT:
-                            mv.visitInsn(Opcodes.FCONST_0);
-                            break;
-                        case Type.LONG:
-                            mv.visitInsn(Opcodes.LCONST_0);
-                            break;
-                        case Type.DOUBLE:
-                            mv.visitInsn(Opcodes.DCONST_0);
-                            break;
-                        case Type.ARRAY:
-                        case Type.OBJECT:
-                            mv.visitInsn(Opcodes.ACONST_NULL);
-                            break;
-                    }
-                }
-                mv.visitFieldInsn(Opcodes.PUTSTATIC, className, staticField.name, staticField.desc);
-
-            }
-        }
-        mv.visitInsn(Opcodes.RETURN);
-        mv.visitMaxs(0, 0);
-        mv.visitEnd();
-
+		System.out.println("Value for : " + staticField.name + " is : " + count1 + " " + j);
+		mv.visitFieldInsn(Opcodes.GETSTATIC, "org/evosuite/runtime/instrumentation/CreateClassResetClassAdapter", "staticFieldValues", "Ljava/util/ArrayList;");
+		mv.visitIntInsn(Opcodes.BIPUSH, j);
+		mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/util/ArrayList", "get", "(I)Ljava/lang/Object;");
+		
+		Type type = Type.getType(staticField.desc);
+		switch (type.getSort()) {
+		case Type.BOOLEAN:
+		    mv.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Boolean");
+		    mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z");
+		    break;
+		case Type.BYTE:
+		    mv.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Byte");
+		    mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Byte", "byteValue", "()B");
+		    break;
+		case Type.CHAR:
+		    mv.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Character");
+		    mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Character", "characterValue", "()C");
+		    break;
+		case Type.SHORT:
+		    mv.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Short");
+		    mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Short", "shortValue", "()S");
+		case Type.INT:
+		    mv.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Integer");
+		    mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I");
+		    break;
+		case Type.FLOAT:
+		    mv.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Float");
+		    mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Float", "floatValue", "()F");
+		    break;
+		case Type.LONG:
+		    mv.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Long");
+		    mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Long", "longValue", "()J");
+		    break;
+		case Type.DOUBLE:
+		    mv.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Double");
+		    mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Double", "doubleValue", "()D");
+		    break;
+		case Type.ARRAY:
+		case Type.OBJECT:
+		    mv.visitTypeInsn(Opcodes.CHECKCAST, staticField.desc.substring(1,staticField.desc.length()-1));
+		    break;
+		}
+		mv.visitFieldInsn(Opcodes.PUTSTATIC, className, staticField.name, staticField.desc);
+	    }
+	}
+	mv.visitInsn(Opcodes.RETURN);
+	mv.visitMaxs(0, 0);
+	mv.visitEnd();
     }
 }
