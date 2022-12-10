@@ -18,12 +18,18 @@ public class Foo_ESTest extends Foo_ESTest_scaffolding {
     @Test(timeout = 4000)
     public void test0()  throws Throwable  {
 	Foo foo = new Foo();
-	assertTrue(foo.id == 0);
+	assertTrue(foo.id1 == 0);
+	assertTrue(foo.id2 == 10);
+       	assertTrue(foo.id3 == 0);
+       	assertTrue(foo.id4 == 10);
     }
     
     @Test(timeout = 4000)
     public void test1()  throws Throwable  {
 	Foo foo = new Foo();
-	assertTrue(foo.id == 0);
+	assertTrue(foo.id1 == 0);
+	assertTrue(foo.id2 == 10);
+       	assertTrue(foo.id3 == 0);
+       	assertTrue(foo.id4 == 10);
     }
 }
