@@ -5,7 +5,7 @@
 
 Repository for ECE382V : Software testing in the era of non-determinism
 
-##Usage##
+<h1>Usage</h1>
 
 Clone the repository and execute
 ```
